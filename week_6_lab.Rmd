@@ -1,0 +1,78 @@
+---
+title: "Week 6 Coding Lesson- Intro to Linear Regression"
+author: "Laurel Wee"
+date: "11/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(ggpubr)
+library(broom)
+```
+
+Part 1: Attach Packages in setup chunk
+
+Part 2: A rank-based test example (Mann Whitney U)
+```{r}
+set.seed(1414) # to create a "pseudo-random" sample 
+gp_1 <- sample.int(20, size = 15, replace = TRUE) # create sample vectors, use 'sample.int' to create random samples with integers from 1 to x, of size=?, and with replacement
+
+set.seed(1424)
+gp_2 <- sample.int(30, size = 15, replace = TRUE)
+
+# quick look at a histogram
+
+hist(gp_1)
+hist(gp_2)
+```
+
+Rank-based test
+Choose rank-based test because not normally distributed from exploratory histograms, small sample size, and ranks or median are more valuable metrics to compare this data. 
+
+Will perform a Mann- Whitney u to answer
+Is there a significant difference in ranks (medians)
+
+```{r}
+my_mwn <- wilcox.test(gp_1, gp_2)
+my_mwn
+```
+
+Part 3: Simple linear regression
+A. Look at palmer penguin data
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g))+
+  geom_point()
+```
+Looks like a linear relationship between flipper length and body mass makes sense. 
+
+B. Model it
+Make model first then can check assumptions for linear regression that are based on model residuals (e.g. normality & homoscedasticity of residuals)
+
+```{r}
+# Linear model, stored as penguin_lm
+penguin_lm <- lm(body_mass_g ~ flipper_length_mm, data = penguins)
+
+# Return the complete overview
+summary(penguin_lm)
+```
+
+C. Access model outputs
+```{r}
+penguin_lm_tidy <- broom::tidy(penguin_lm) # summary would be messy so use 'broom::tidy()'
+```
+```{r}
+# Get the intercept:
+penguin_int <-penguin_lm_tidy$estimate[1]
+penguin_int
+```
+```{r}
+# Then to get the flipper_length coefficient:
+penguin_coef <-penguin_lm_tidy$estimate[2]
+penguin_coef
+```
+
+
