@@ -12,10 +12,11 @@ library(palmerpenguins)
 library(ggpubr)
 library(broom)
 ```
+Note: See lab 6 key for full descriptions
 
-Part 1: Attach Packages in setup chunk
+# Part 1: Attach Packages in setup chunk
 
-Part 2: A rank-based test example (Mann Whitney U)
+# Part 2: A rank-based test example (Mann Whitney U)
 ```{r}
 set.seed(1414) # to create a "pseudo-random" sample 
 gp_1 <- sample.int(20, size = 15, replace = TRUE) # create sample vectors, use 'sample.int' to create random samples with integers from 1 to x, of size=?, and with replacement
@@ -40,8 +41,8 @@ my_mwn <- wilcox.test(gp_1, gp_2)
 my_mwn
 ```
 
-Part 3: Simple linear regression
-A. Look at palmer penguin data
+# Part 3: Simple linear regression
+## A. Look at palmer penguin data
 
 ```{r}
 ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g))+
@@ -49,7 +50,7 @@ ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g))+
 ```
 Looks like a linear relationship between flipper length and body mass makes sense. 
 
-B. Model it
+## B. Model it
 Make model first then can check assumptions for linear regression that are based on model residuals (e.g. normality & homoscedasticity of residuals)
 
 ```{r}
@@ -60,7 +61,7 @@ penguin_lm <- lm(body_mass_g ~ flipper_length_mm, data = penguins)
 summary(penguin_lm)
 ```
 
-C. Access model outputs
+## C. Access model outputs
 ```{r}
 penguin_lm_tidy <- broom::tidy(penguin_lm) # summary would be messy so use 'broom::tidy()'
 ```
@@ -74,5 +75,44 @@ penguin_int
 penguin_coef <-penguin_lm_tidy$estimate[2]
 penguin_coef
 ```
+```{r}
+# Metrics at a glance
+penguin_lm_out <- broom::tidy(penguin_lm)
+penguin_lm_out
+```
+Example conclusion: “Simple linear regression was used to explore the relationship between penguin flipper length (mm) and body mass (g) across all three penguin species, and including both male and female penguins. A significant regression model was found (β = 49.686, F(1,340) = 1070.7, p < 0.001) with an R2 of 0.759.”
+
+## D. Explore model assumptions
+
+Explore assumptions for linear regression
+- Linearly related variables (CHECK - already looked & thought hard)
+- Normally distributed residuals
+- Homoscedasticity (constant residuals variance)
+- iid residuals (no serial correlation) - more often a concern in time series data
+
+```{r}
+plot(penguin_lm) # will automatically create four useful visualizations to consider assumptions
+```
+## E. Visualize the model
+```{r}
+ggplot(data = penguins, 
+       aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", # to add a linear model to an existing scatterplot
+              color = "red",
+              size = 0.5,
+              fill = "gray10",
+              alpha = 0.5) +
+  theme_light() +
+  ggpubr::stat_regline_equation(label.x = 180, label.y = 5700) # to add equation information directly to the plot panel, x- and y- position that you specify
+```
 
 
+## F. Find Pearson's r for correlation:
+```{r}
+penguins_cor <- cor.test( # reports the r value and performs hypothesis test with null the correlation = 0
+  penguins$flipper_length_mm, penguins$body_mass_g) # two vectors
+```
+Here, we see that there is a strong positive correlation between penguin flipper length and body mass (r = 0.87, t(340) = 32.72, p < 0.001).
+
+# END of LAB
